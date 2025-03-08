@@ -4,8 +4,10 @@ import pandas as pd
 import requests
 
 # Constants
-CDGC_API_URL = "https://your-cdgc-instance/api"
-API_KEY = "your_api_key_here"
+CDGC_API_URL = "https://your-cdgc-instance/v1"
+CDGC_AUTH_URL = "https://your-cdgc-instance/v1/login"
+USERNAME = "your_username"
+PASSWORD = "your_password"
 
 # File paths
 RULES_DIRECTORY = "/mnt/data/"
@@ -13,11 +15,29 @@ EXCEL_FILE = "/mnt/data/PCI_DSS_Regualtion_Assets.xlsx"
 DQ_OUTPUT_FILE = "/mnt/data/Generated_IDMC_DQ_Bundle.json"
 BT_OUTPUT_FILE = "/mnt/data/Generated_Business_Terms.xlsx"
 
-# Function to upload data to CDGC API
-def upload_to_cdgc(data, endpoint):
-    headers = {'Authorization': f'Bearer {API_KEY}', 'Content-Type': 'application/json'}
-    response = requests.post(f"{CDGC_API_URL}/{endpoint}", json=data, headers=headers)
+# Authenticate and get access token
+def get_access_token():
+    payload = {"username": USERNAME, "password": PASSWORD}
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(CDGC_AUTH_URL, json=payload, headers=headers)
+    
     if response.status_code == 200:
+        return response.json().get("access_token")
+    else:
+        raise Exception(f"Authentication failed: {response.text}")
+
+# Function to upload data to CDGC API
+def upload_to_cdgc(data, endpoint, token):
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+    
+    url = f"{CDGC_API_URL}/{endpoint}"
+    response = requests.post(url, json=data, headers=headers)
+    
+    if response.status_code in [200, 201]:
         print(f"Successfully uploaded to {endpoint}")
     else:
         print(f"Upload failed with status code {response.status_code}: {response.text}")
@@ -29,23 +49,16 @@ def load_business_terms(file_path):
     
     for _, row in df.iterrows():
         term_entry = {
-            "Reference ID": f"BT_{row['Business Term']}",
-            "Name": row['Business Term'],
-            "Description": row['Definition'],
-            "Alias Names": row.get('Alias Names', ""),
-            "Business Logic": row.get('Business Logic', ""),
-            "Critical Data Element": row.get('Critical Data Element', "No"),
-            "Examples": row.get('Examples', ""),
-            "Format Type": row.get('Format Type', ""),
-            "Format Description": row.get('Format Description', ""),
-            "Lifecycle": row.get('Lifecycle', ""),
-            "Security Level": row.get('Security Level', ""),
-            "Classifications": row.get('Classification', ""),
-            "Operation": "Create",
-            "Parent: Subdomain": row.get('Parent: Subdomain', ""),
-            "Parent: Business Term": row.get('Parent: Business Term', ""),
-            "Parent: Metric": row.get('Parent: Metric', ""),
-            "Parent: Domain": row.get('Parent: Domain', "")
+            "name": row['Business Term'],
+            "description": row['Definition'],
+            "classifications": row.get('Classification', ""),
+            "aliasNames": row.get('Alias Names', ""),
+            "businessLogic": row.get('Business Logic', ""),
+            "securityLevel": row.get('Security Level', ""),
+            "lifecycle": row.get('Lifecycle', ""),
+            "parentDomain": row.get('Parent: Domain', ""),
+            "parentSubdomain": row.get('Parent: Subdomain', ""),
+            "parentBusinessTerm": row.get('Parent: Business Term', "")
         }
         business_terms.append(term_entry)
     
@@ -58,12 +71,9 @@ def load_dq_rules_from_excel(file_path):
     
     for _, row in df.iterrows():
         rule_entry = {
-            "id": f"DQ_{row['Column Name']}",
             "name": row['Rule Name'],
             "description": row['Rule Description'],
-            "documentType": "RULE_SPECIFICATION",
             "dimension": row.get('Dimension', ""),
-            "exception": "false",
             "inputFields": [row['Column Name']],
             "ruleLogic": row.get('Rule Logic', "")
         }
@@ -83,12 +93,9 @@ def process_dq_rules(directory):
                 rule_data = json.load(file)
                 
                 rule_entry = {
-                    "id": rule_data.get("id", ""),
                     "name": rule_data.get("name", ""),
                     "description": rule_data.get("description", ""),
-                    "documentType": rule_data.get("documentType", "RULE_SPECIFICATION"),
                     "dimension": next((attr["value"] for attr in rule_data.get("customAttributes", {}).get("stringAttrs", []) if attr["name"] == "DIMENSION"), ""),
-                    "exception": next((attr["value"] for attr in rule_data.get("customAttributes", {}).get("stringAttrs", []) if attr["name"] == "EXCEPTION"), "false"),
                     "inputFields": [field["name"] for field in json.loads(rule_data.get("nativeData", {}).get("documentBlob", "{}")).get("inputFields", [])],
                     "ruleLogic": json.loads(rule_data.get("nativeData", {}).get("documentBlob", "{}")).get("ruleModel", "")
                 }
@@ -96,6 +103,9 @@ def process_dq_rules(directory):
                 dq_rules.append(rule_entry)
     
     return dq_rules
+
+# Authenticate and get token
+token = get_access_token()
 
 # Combine business terms, classifications, and DQ rules
 business_terms = load_business_terms(EXCEL_FILE)
@@ -117,5 +127,5 @@ print(f"Generated Business Terms Excel: {BT_OUTPUT_FILE}")
 print(f"Generated Informatica-compatible JSON bundle: {DQ_OUTPUT_FILE}")
 
 # Upload to CDGC API
-upload_to_cdgc(business_terms, "business-terms")
-upload_to_cdgc(dq_bundle, "data-quality-rules")
+upload_to_cdgc({"businessTerms": business_terms}, "assets/business-terms/import", token)
+upload_to_cdgc({"rules": dq_bundle["rules"]}, "assets/data-quality-rules/import", token)
