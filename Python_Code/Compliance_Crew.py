@@ -4,8 +4,9 @@ import pandas as pd
 import requests
 
 # Constants
-CDGC_API_URL = "https://your-cdgc-instance/v1"
-CDGC_AUTH_URL = "https://your-cdgc-instance/v1/login"
+CDGC_API_BASE_URL = "https://your-cdgc-instance"
+CDGC_LOGIN_URL = f"{CDGC_API_BASE_URL}/ma/api/v2/user/login"
+CDGC_BULK_UPLOAD_URL = f"{CDGC_API_BASE_URL}/data360/assets/v1/bulk"
 USERNAME = "your_username"
 PASSWORD = "your_password"
 
@@ -15,30 +16,31 @@ EXCEL_FILE = "/mnt/data/PCI_DSS_Regualtion_Assets.xlsx"
 DQ_OUTPUT_FILE = "/mnt/data/Generated_IDMC_DQ_Bundle.json"
 BT_OUTPUT_FILE = "/mnt/data/Generated_Business_Terms.xlsx"
 
-# Authenticate and get access token
-def get_access_token():
+# Authenticate with CDGC API
+def authenticate_cdgc():
     payload = {"username": USERNAME, "password": PASSWORD}
-    headers = {'Content-Type': 'application/json'}
-    response = requests.post(CDGC_AUTH_URL, json=payload, headers=headers)
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(CDGC_LOGIN_URL, json=payload, headers=headers)
     
     if response.status_code == 200:
-        return response.json().get("access_token")
+        session_token = response.json().get("icSessionId")
+        return session_token
     else:
-        raise Exception(f"Authentication failed: {response.text}")
+        print(f"Authentication failed: {response.text}")
+        return None
 
-# Function to upload data to CDGC API
-def upload_to_cdgc(data, endpoint, token):
+# Upload data to CDGC API
+def upload_to_cdgc(data, session_token):
     headers = {
-        'Authorization': f'Bearer {token}',
+        'Authorization': f'Bearer {session_token}',
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     }
     
-    url = f"{CDGC_API_URL}/{endpoint}"
-    response = requests.post(url, json=data, headers=headers)
+    response = requests.post(CDGC_BULK_UPLOAD_URL, json=data, headers=headers)
     
     if response.status_code in [200, 201]:
-        print(f"Successfully uploaded to {endpoint}")
+        print("Successfully uploaded to CDGC")
     else:
         print(f"Upload failed with status code {response.status_code}: {response.text}")
 
@@ -104,28 +106,29 @@ def process_dq_rules(directory):
     
     return dq_rules
 
-# Authenticate and get token
-token = get_access_token()
+# Authenticate and process data
+session_token = authenticate_cdgc()
+if session_token:
+    
+    # Combine business terms, classifications, and DQ rules
+    business_terms = load_business_terms(EXCEL_FILE)
+    dq_rules_from_excel = load_dq_rules_from_excel(EXCEL_FILE)
+    dq_rules_from_directory = process_dq_rules(RULES_DIRECTORY)
 
-# Combine business terms, classifications, and DQ rules
-business_terms = load_business_terms(EXCEL_FILE)
-dq_rules_from_excel = load_dq_rules_from_excel(EXCEL_FILE)
-dq_rules_from_directory = process_dq_rules(RULES_DIRECTORY)
+    # Generate Informatica-compatible DQ bundle
+    dq_bundle = {
+        "bundleName": "PCI_DSS_DQ_Bundle",
+        "rules": dq_rules_from_excel + dq_rules_from_directory
+    }
 
-# Generate Informatica-compatible DQ bundle
-dq_bundle = {
-    "bundleName": "PCI_DSS_DQ_Bundle",
-    "rules": dq_rules_from_excel + dq_rules_from_directory
-}
+    # Save outputs
+    pd.DataFrame(business_terms).to_excel(BT_OUTPUT_FILE, index=False)
+    with open(DQ_OUTPUT_FILE, "w") as output_file:
+        json.dump(dq_bundle, output_file, indent=4)
 
-# Save outputs
-pd.DataFrame(business_terms).to_excel(BT_OUTPUT_FILE, index=False)
-with open(DQ_OUTPUT_FILE, "w") as output_file:
-    json.dump(dq_bundle, output_file, indent=4)
+    print(f"Generated Business Terms Excel: {BT_OUTPUT_FILE}")
+    print(f"Generated Informatica-compatible JSON bundle: {DQ_OUTPUT_FILE}")
 
-print(f"Generated Business Terms Excel: {BT_OUTPUT_FILE}")
-print(f"Generated Informatica-compatible JSON bundle: {DQ_OUTPUT_FILE}")
-
-# Upload to CDGC API
-upload_to_cdgc({"businessTerms": business_terms}, "assets/business-terms/import", token)
-upload_to_cdgc({"rules": dq_bundle["rules"]}, "assets/data-quality-rules/import", token)
+    # Upload to CDGC API
+    upload_to_cdgc({"businessTerms": business_terms}, session_token)
+    upload_to_cdgc({"rules": dq_bundle["rules"]}, session_token)
