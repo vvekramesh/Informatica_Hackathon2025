@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 
 # Constants
-CDGC_API_BASE_URL = "https://your-cdgc-instance"
+CDGC_API_BASE_URL = "https://cdgc-instance"
 CDGC_LOGIN_URL = f"{CDGC_API_BASE_URL}/ma/api/v2/user/login"
 CDGC_BULK_UPLOAD_URL = f"{CDGC_API_BASE_URL}/data360/assets/v1/bulk"
 USERNAME = "your_username"
