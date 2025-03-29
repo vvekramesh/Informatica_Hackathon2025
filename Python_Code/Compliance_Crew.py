@@ -4,7 +4,7 @@ import pandas as pd
 import google.generativeai as genai
 
 # Gemini AI Configuration (Replace API Key Handling in Production)
-GEMINI_API_KEY = "AIzaSyAtUIpU_xullFxVsZ0mTkQ6_SYlo78XueQ"
+GEMINI_API_KEY = ""
 genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize Gemini Model
