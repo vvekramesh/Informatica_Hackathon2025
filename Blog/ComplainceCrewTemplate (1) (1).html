@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Compliance Crew Blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Georgia', serif;
+            background: #f9f6f2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .blog-container {
+            max-width: 800px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .blog-img {
+            width: 25%;
+            border-radius: 10px;
+            margin-right: 20px;
+        }
+		.blog-imgwireframe {
+           width: 100%; /* Expands the image to fit the container */
+			max-width: 100%; /* Ensures it doesn't exceed the container */
+			border-radius: 10px;
+			display: block; /* Removes extra spacing */
+			margin: 20px auto; /* Centers the image */
+        }
+        .header-text {
+            flex: 1;
+        }
+        .blog-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .blog-slogan {
+            font-size: 12px;
+            font-style: italic;
+            color: #555;
+        }
+        .blog-content {
+            font-size: 12px;
+            line-height: 1.6;
+            text-align: justify;
+            color: #333;
+            margin-top: 10px;
+        }
+        .section-title {
+            font-size: 18px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid black;
+        }
+        ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="blog-container">
+        <div class="header">
+            <img src="https://github.com/vvekramesh/Informatica_Hackathon2025/blob/main/Blog/ComplainceLogo.png?raw=TRUE" alt="Compliance Crew Logo" class="blog-img">
+            <div class="header-text">
+                <h1 class="blog-title">The Compliance Crew</h1>
+                <p class="blog-slogan">Your Trustworthy Data Guardians!</p>
+            </div>
+        </div>
+        
+        <div class="blog-content">
+		<h2 class="section-title">Introduction</h2>
+		<p>In today’s digital banking landscape, ensuring compliance with banking regulations is crucial for financial institutions. 
+		<strong>Compliance Crew AI (CCAI) </strong> is an AI-powered governance solution designed to address the critical challenges of data governance and risk management in the banking sector. 
+
+   Non-compliance with industry regulations like PCI DSS and GDPR can result in severe consequences, including regulatory fines, data breaches, and financial fraud. CCAI aims to mitigate these risks by implementing a robust, AI-driven governance framework tailored for banking compliance.</p>
+		
+		<h2 class="section-title">Problem Statement</h2>
+            <p>"Ever wondered how much time and effort you could save by automating compliance processes?"</p>
+            <p>"Did you know that manual compliance processes can take up to 40% of a company's resources?"</p>
+            <p>"'Compliance is the key to trust.' But what if it could also be the key to efficiency?"</p>
+ <h2 class="section-title">Prototype Overview</h2>
+            <p><strong>Enter Compliance Crew Utility, AI-powered ally in automating compliance</strong></p>
+<p>This project introduces an AI-driven framework for compliance and regulatory risk management. It offers data classification, a business glossary, and data quality rules tailored to specific compliance requirements. Using a template-driven approach, it streamlines regulatory adherence, enhances data governance, and ensures accuracy. Powered by Informatica IDMC services, it helps financial institutions mitigate risks, detect governance violations, and maintain compliance, minimizing penalties and strengthening consumer trust.
+</p>
+            <h2 class="section-title">Technology Used</h2>
+            <ul>
+                <li><strong>Informatica:</strong> (Metadata Command Center, Cloud Data Governance and Catalog, Cloud Data Quality, Cloud Application Integration)</li>
+				<li><strong>Python</strong></li>
+				<li><strong>Google AI Studio </strong>(gemini-2.0-flash)</li>
+            </ul>
+
+<h2 class="section-title">Technical Implementation</h2>
+<p>Wireframes/Mock diagrams of the prototype</p>
+<img src="https://github.com/vvekramesh/Informatica_Hackathon2025/blob/main/Blog/Wireframe.png?raw=TRUE" alt="Wireframe" class="blog-imgwireframe">
+
+            <h2 class="section-title">How It Works</h2>
+            <p>Ensuring regulatory compliance can be complex, but with our Compliance Crew Utility, we streamline the process using AI-driven automation.</p>
+
+            <h3 class="section-title">Step-by-Step Process:</h3>
+             <h2 class="section-title">Prototype Demo: AI-Powered Compliance in Action</h2>
+
+            <h3 class="section-title">1️. Metadata Extraction & Scanning</h3>
+            <ul>The system scans <strong>banking metadata</strong> from <strong>IDMC (MCC/CDGC/CDQ)</strong> to identify and extract <strong>key data elements</strong> relevant to compliance.</ul>
+
+            <h3 class="section-title">2. AI-Driven Compliance Insights</h3>
+			<ul>
+            <li>Users interact with an <strong>AI-powered chatbot (Gemini AI)</strong> to ask regulatory compliance-related questions.</li>
+            <li>AI provides <strong>automated recommendations</strong> for <strong>classification, glossary terms, and data quality rules</strong>, reducing manual effort.</li>
+			</ul>
+            <h3 class="section-title">3. Automated Data Classification & Governance Framework</h3>
+			<ul>
+            <li>AI assigns <strong>predefined classification labels</strong> based on <strong>banking regulatory compliance requirements</strong> (PCI DSS, GDPR).</li>
+            <li>System <strong>automatically generates</strong> structured <strong>CDGC asset templates</strong>, including:</li>
+            <ul>
+                <li>Policy</li>
+                <li>Regulation</li>
+                <li>Business Term</li>
+                <li>Metric</li>
+                <li>Data Quality Template</li>
+            </ul></ul>
+
+            <h3 class="section-title">4. Data Quality & Risk Evaluation</h3>
+            <ul><li>AI <strong>maps relevant Data Quality Rules</strong> to classified data elements, ensuring accuracy and compliance.</li>
+            <li>The system calculates <strong>Data Quality Scores</strong> to measure <strong>compliance adherence</strong> and identify potential risks.</li>
+</ul>
+            <h3 class="section-title">5. Final Compliance Validation</h3>
+            <ul><li>The <strong>enriched metadata</strong> is uploaded back into <strong>IDMC</strong> for validation.</li>
+            <li>The system <strong>re-scans resources</strong> to confirm <strong>classification accuracy</strong> and adherence to governance policies.</li>
+</ul>
+
+            <h2 class="section-title">Results Comparison</h2>
+            <p>The Compliance Crew Utility transforms raw metadata into structured, enriched, and compliance-ready datasets within a day. This automation reduces time and effort, enhances accuracy, and minimizes errors compared to manual processes.</p>
+
+            <h2 class="section-title">Conclusion</h2>
+            <p>With the Compliance Crew Utility, achieving compliance is efficient, automated, and hassle-free. Ready to transform your compliance workflow? Let’s get started!</p>
+        </div>
+
+        <div class="footer">@thecompliancecrew</div>
+    </div>
+</body>
+</html>
